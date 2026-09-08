@@ -39,10 +39,21 @@
   }
   .app {
     display: flex;
-    height: 100dvh;
-    padding: calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+    height: calc(100dvh - 62px);
+    padding: 10px calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
     gap: 14px;
   }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    padding: calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
+  }
+  .day-switch { display: flex; background: var(--card); border-radius: 10px; padding: 3px; gap: 3px; }
+  .day-switch button {
+    border: 0; background: transparent; color: var(--text-2);
+    font-size: 14px; font-weight: 600; padding: 7px 20px; border-radius: 8px; cursor: pointer;
+  }
+  .day-switch button.active { background: var(--accent); color: #fff; }
+  .top-date { font-size: 14px; color: var(--text-2); }
   aside {
     flex: 1 1 0; min-width: 0;
     display: flex; flex-direction: column;
@@ -59,30 +70,25 @@
     overflow: hidden;
   }
 
-  /* ---------- 左栏:标题与日期 ---------- */
-  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .brand .logo {
-    width: 40px; height: 40px; border-radius: 11px;
-    background: var(--accent-soft); color: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .brand .logo svg { width: 22px; height: 22px; }
-  .brand h1 { font-size: 20px; margin: 0; letter-spacing: .5px; }
-  .brand .sub { font-size: 12px; color: var(--text-2); margin-top: 1px; }
-
-  .day-switch { display: flex; background: var(--card); border-radius: 14px; padding: 5px; gap: 5px; margin-bottom: 16px; }
-  .day-switch button {
-    flex: 1; border: 0; background: transparent; color: var(--text-2);
-    font-size: 16px; font-weight: 600; padding: 11px 0; border-radius: 11px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-  }
-  .day-switch button svg { width: 17px; height: 17px; }
-  .day-switch button.active { background: var(--accent); color: #fff; }
-
   /* ---------- 左栏:表单 ---------- */
-  .form-card { background: var(--card); border-radius: 16px; padding: 16px; }
+  .aside-top { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 10px; }
+  .add-btn {
+    width: 44px; height: 44px; border-radius: 22px; border: 0;
+    background: var(--accent); color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(91, 140, 255, .35);
+  }
+  .add-btn svg { width: 22px; height: 22px; }
+  .add-btn:active { opacity: .85; }
+  .cancel-btn {
+    width: 44px; height: 44px; border-radius: 22px;
+    border: 1px solid var(--line); background: var(--card); color: var(--text-2); cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+  }
+  .cancel-btn svg { width: 18px; height: 18px; }
+  .form-card { background: var(--card); border-radius: 16px; padding: 14px 16px 16px; }
   .form-card .f-label { font-size: 12px; color: var(--text-2); margin-bottom: 6px; display: block; }
-  .form-card input[type=text], .form-card textarea, .form-card input[type=time] {
+  .form-card input[type=text], .form-card textarea {
     width: 100%; font-size: 16px; padding: 11px 13px; margin-bottom: 12px;
     border: 1px solid var(--line); border-radius: 12px; outline: none;
     background: var(--card-2); color: var(--text); font-family: inherit;
@@ -94,35 +100,25 @@
   .time-row .t-col .f-label { margin-bottom: 6px; }
   .wheel-pair { position: relative; display: flex; gap: 6px; }
   .wheel {
-    flex: 1; min-width: 0; height: 138px; overflow-y: auto;
+    flex: 1; min-width: 0; height: 108px; overflow-y: auto;
     scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch;
     scrollbar-width: none; overscroll-behavior: contain;
   }
   .wheel::-webkit-scrollbar { display: none; }
-  .wheel .wheel-items { padding: 46px 0; }
+  .wheel .wheel-items { padding: 36px 0; }
   .wheel .wi {
-    height: 46px; scroll-snap-align: center;
+    height: 36px; scroll-snap-align: center;
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px; color: var(--text-2);
+    font-size: 15px; color: var(--text-2);
     font-variant-numeric: tabular-nums; cursor: pointer;
     transition: color .12s;
   }
-  .wheel .wi.sel { color: var(--text); font-weight: 700; font-size: 20px; }
+  .wheel .wi.sel { color: var(--text); font-weight: 700; font-size: 17px; }
   .wheel-pair::before, .wheel-pair::after {
-    content: ''; position: absolute; left: 0; right: 0; height: 26px; z-index: 3; pointer-events: none;
+    content: ''; position: absolute; left: 0; right: 0; height: 20px; z-index: 3; pointer-events: none;
   }
   .wheel-pair::before { top: 0; background: linear-gradient(to bottom, var(--card) 15%, rgba(22, 28, 40, 0)); }
   .wheel-pair::after { bottom: 0; background: linear-gradient(to top, var(--card) 15%, rgba(22, 28, 40, 0)); }
-  .form-card .btn-submit {
-    width: 100%; border: 0; border-radius: 12px; padding: 13px 0; margin-top: 4px;
-    background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .form-card .btn-submit svg { width: 17px; height: 17px; }
-  .form-card .btn-submit:active { opacity: .85; }
-  .edit-hint { display: none; margin: 10px 0 0; font-size: 12px; color: var(--accent); align-items: center; gap: 6px; }
-  .edit-hint.show { display: flex; }
-  .edit-hint button { border: 0; background: none; color: var(--text-3); font-size: 12px; margin-left: auto; cursor: pointer; }
 
   .day-summary { margin-top: 14px; font-size: 13px; color: var(--text-2); display: flex; gap: 14px; align-items: center; }
   .day-summary b { color: var(--text); }
@@ -197,27 +193,24 @@
 </style>
 </head>
 <body>
+<div class="topbar">
+  <div class="day-switch" id="day-switch">
+    <button data-day="today" class="active">今天</button>
+    <button data-day="tomorrow">明天</button>
+  </div>
+  <div class="top-date" id="top-date"></div>
+</div>
 <div class="app">
-  <!-- 左栏:日期切换 + 表单 -->
+  <!-- 左栏:表单 -->
   <aside>
-    <div class="brand">
-      <div class="logo"><i data-lucide="calendar-days"></i></div>
-      <div>
-        <h1>快捷日程表</h1>
-        <div class="sub">iPad 日程时间线</div>
-      </div>
-    </div>
-
-    <div class="day-switch" id="day-switch">
-      <button data-day="today" class="active"><i data-lucide="sun"></i>今天</button>
-      <button data-day="tomorrow"><i data-lucide="sunrise"></i>明天</button>
+    <div class="aside-top">
+      <button class="cancel-btn" id="btn-cancel-edit" title="取消编辑"><i data-lucide="x"></i></button>
+      <button class="add-btn" id="btn-submit" title="添加/保存"><i data-lucide="plus"></i></button>
     </div>
 
     <div class="form-card">
-      <label class="f-label">任务名</label>
-      <input type="text" id="f-title" placeholder="例如：写周报" maxlength="60">
-      <label class="f-label">备注</label>
-      <textarea id="f-note" placeholder="可选，细节说明…" maxlength="300"></textarea>
+      <input type="text" id="f-title" placeholder="任务名" maxlength="60">
+      <textarea id="f-note" placeholder="备注" maxlength="300"></textarea>
       <div class="time-row">
         <div class="t-col">
           <label class="f-label">开始时间</label>
@@ -233,12 +226,6 @@
             <div class="wheel" id="wem"></div>
           </div>
         </div>
-      </div>
-      <button class="btn-submit" id="btn-submit"><i data-lucide="plus"></i>添加任务</button>
-      <div class="edit-hint" id="edit-hint">
-        <i data-lucide="pencil" style="width:14px;height:14px"></i>
-        <span>正在编辑，保存将覆盖原任务</span>
-        <button id="btn-cancel-edit">取消</button>
       </div>
     </div>
 
@@ -309,7 +296,7 @@
   var fTitle = $('#f-title'), fNote = $('#f-note');
   /* 网页内嵌滚轮(直接嵌在表单里):触屏/滚轮滚动,scroll-snap 吸附,居中选择,
      小时 00-23 × 分钟 00/05/.../55,真正 5 分钟一档 */
-  var ITEM_H = 46;
+  var ITEM_H = 36;
   var CAN_SMOOTH = 'scrollBehavior' in document.documentElement.style;
   function makeWheel(el, items) {
     el.innerHTML = '<div class="wheel-items">' + items.map(function (v, i) {
@@ -393,8 +380,8 @@
 
   /* ================= 编辑模式(左侧直接编辑,不弹键盘) ================= */
   function setEditMode(on) {
-    $('#edit-hint').classList.toggle('show', on);
-    $('#btn-submit').innerHTML = on ? '<i data-lucide="check"></i>保存修改' : '<i data-lucide="plus"></i>添加任务';
+    $('#btn-cancel-edit').style.display = on ? 'flex' : 'none';
+    $('#btn-submit').innerHTML = on ? '<i data-lucide="check"></i>' : '<i data-lucide="plus"></i>';
     if (window.lucide) lucide.createIcons();
   }
   function loadEdit(it) {
@@ -528,7 +515,8 @@
     }
 
     $('#tl-day').textContent = selDay === 'today' ? '今天' : '明天';
-    $('#tl-meta').textContent = dayLabel(day) + ' · ' + dayItems.length + ' 项';
+    $('#top-date').textContent = dayLabel(day);
+    $('#tl-meta').textContent = dayItems.length + ' 项';
 
     var total = dayItems.reduce(function (s, it) { return s + Math.max((it.endMin - it.startMin), 30); }, 0);
     $('#day-summary').innerHTML = '<span>当天 <b>' + dayItems.length + '</b> 项</span><span>总时长 <b>' +
