@@ -199,9 +199,9 @@
       <textarea id="f-note" placeholder="可选，细节说明…" maxlength="300"></textarea>
       <div class="time-block">
         <label class="f-label">开始时间</label>
-        <input type="time" id="f-start">
+        <input type="time" id="f-start" step="300">
         <label class="f-label" style="margin-top:2px">结束时间</label>
-        <input type="time" id="f-end">
+        <input type="time" id="f-end" step="300">
       </div>
       <button class="btn-submit" id="btn-submit"><i data-lucide="plus"></i>添加任务</button>
       <div class="edit-hint" id="edit-hint">
@@ -276,9 +276,10 @@
 
   /* ================= 表单 ================= */
   var fTitle = $('#f-title'), fNote = $('#f-note'), fStart = $('#f-start'), fEnd = $('#f-end');
+  function round5(m) { return Math.round(m / 5) * 5; }   // 时间对齐到 5 分钟
   function defaultTimes() {
     var d = new Date();
-    var m = Math.ceil((d.getHours() * 60 + d.getMinutes() + 30) / 30) * 30; // 最近半点之后
+    var m = round5(d.getHours() * 60 + d.getMinutes() + 30); // 最近 5 分钟刻度 + 30 分钟
     if (m >= 1440) m = 1410;
     fStart.value = minsToHHMM(m);
     fEnd.value = minsToHHMM(Math.min(m + 60, 1439));
@@ -288,8 +289,8 @@
   function submit() {
     var title = fTitle.value.trim();
     if (!title) { toast('请先填写任务名'); fTitle.focus(); return; }
-    var startMin = toMin(fStart.value, 540);   // 默认 9:00
-    var endMin = toMin(fEnd.value, startMin + 60);
+    var startMin = round5(toMin(fStart.value, 540));   // 默认 9:00,对齐 5 分钟
+    var endMin = round5(toMin(fEnd.value, startMin + 60));
     if (endMin <= startMin) {
       endMin = Math.min(startMin + 60, 1500);
       toast('结束时间早于开始，已自动设为开始后 1 小时');
@@ -325,8 +326,8 @@
     editingId = it.id;
     fTitle.value = it.title;
     fNote.value = it.note || '';
-    fStart.value = minsToHHMM(it.startMin);
-    fEnd.value = minsToHHMM(Math.min(it.endMin, 1439));
+    fStart.value = minsToHHMM(round5(it.startMin));
+    fEnd.value = minsToHHMM(round5(Math.min(it.endMin, 1439)));
     setEditMode(true);
     toast('正在编辑：' + it.title);
     // 故意不 focus:不在 iPad 上自动弹键盘
