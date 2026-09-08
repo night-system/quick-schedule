@@ -285,7 +285,7 @@
   function save() { localStorage.setItem(KEY, JSON.stringify(items)); }
   function uid() { return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   var items = load() || [];
-  items.forEach(function (it) { if (typeof it.leadMin !== 'number') it.leadMin = 30; });
+  items.forEach(function (it) { if (typeof it.leadMin !== 'number') it.leadMin = 5; });
   // 形如 { id, title, note, day:'YYYY-MM-DD', startMin, endMin }
 
   /* ================= 日期工具 ================= */
@@ -374,7 +374,7 @@
   var wLead = makeWheel($('#wl'), ['5min', '30min', '1h'], null, 28);   // 小滚轮 item 高 28px
   function getLead() { return LEAD_TICKS[wLead.getVal()]; }
   function setLead(m) { var i = LEAD_TICKS.indexOf(m); wLead.setVal(i === -1 ? 1 : i, false); }
-  setLead(30);
+  setLead(5);   // 默认档 5min
   function setTimeSel(sels, min, smooth) {
     min = round5(Math.max(0, Math.min(min, 1440 - 5)));
     sels[0].setVal(Math.floor(min / 60), smooth);
