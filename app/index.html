@@ -89,8 +89,9 @@
   }
   .form-card input:focus, .form-card textarea:focus { border-color: var(--accent); }
   .form-card textarea { resize: none; min-height: 58px; }
-  .time-grid { display: flex; gap: 10px; }
-  .time-grid .t-col { flex: 1; }
+  .time-block { margin-bottom: 12px; }
+  .time-block .f-label { margin-bottom: 6px; }
+  .time-block input[type=time] { margin-bottom: 0; }
   .form-card .btn-submit {
     width: 100%; border: 0; border-radius: 12px; padding: 13px 0; margin-top: 4px;
     background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
@@ -115,12 +116,12 @@
   .tl-head .meta { font-size: 12px; color: var(--text-2); margin-right: 8px; }
   .tl-head .right { display: flex; align-items: center; gap: 8px; }
   .btn-copy {
-    border: 1px solid var(--line); background: var(--card); color: var(--text-2);
-    width: 34px; height: 34px; border-radius: 10px; cursor: pointer;
+    border: 0; background: transparent; color: var(--text-2);
+    padding: 6px; border-radius: 8px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
   }
-  .btn-copy svg { width: 16px; height: 16px; }
-  .btn-copy:active { color: var(--accent); border-color: var(--accent); }
+  .btn-copy svg { width: 20px; height: 20px; }
+  .btn-copy:active { color: var(--accent); }
   .tl-scroll { flex: 1; overflow-y: auto; position: relative; overscroll-behavior: contain; }
   .tl-body { position: relative; min-height: 100%; }
   .tl-axis { position: sticky; left: 0; width: 54px; float: left; z-index: 3; background: var(--panel); }
@@ -196,15 +197,11 @@
       <input type="text" id="f-title" placeholder="例如：写周报" maxlength="60">
       <label class="f-label">备注</label>
       <textarea id="f-note" placeholder="可选，细节说明…" maxlength="300"></textarea>
-      <div class="time-grid">
-        <div class="t-col">
-          <label class="f-label">开始时间</label>
-          <input type="time" id="f-start">
-        </div>
-        <div class="t-col">
-          <label class="f-label">结束时间</label>
-          <input type="time" id="f-end">
-        </div>
+      <div class="time-block">
+        <label class="f-label">开始时间</label>
+        <input type="time" id="f-start">
+        <label class="f-label" style="margin-top:2px">结束时间</label>
+        <input type="time" id="f-end">
       </div>
       <button class="btn-submit" id="btn-submit"><i data-lucide="plus"></i>添加任务</button>
       <div class="edit-hint" id="edit-hint">
