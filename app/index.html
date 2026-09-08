@@ -100,6 +100,16 @@
   }
   .form-card input:focus, .form-card textarea:focus { border-color: var(--accent); }
   .form-card textarea { resize: none; min-height: 58px; }
+  .note-wrap { position: relative; margin-bottom: 12px; }
+  .note-wrap textarea { margin-bottom: 0; padding-right: 40px; }
+  .alarm-btn {
+    position: absolute; right: 8px; bottom: 8px;
+    width: 28px; height: 28px; border-radius: 8px; border: 0;
+    background: transparent; color: var(--text-3); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .alarm-btn svg { width: 16px; height: 16px; }
+  .alarm-btn.on { color: #f5c451; background: rgba(245, 196, 81, .12); }
   .time-row { display: flex; gap: 14px; margin-bottom: 12px; }
   .time-row .t-col { flex: 1; min-width: 0; }
   .time-row .t-col .f-label { margin-bottom: 6px; }
@@ -166,7 +176,9 @@
     border-left: 3px solid var(--accent);
     padding: 7px 32px 7px 11px; overflow: hidden; cursor: pointer;
   }
-  .evt .t { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .evt .t { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
+  .evt .alarm-badge { flex-shrink: 0; display: flex; }
+  .evt .alarm-badge svg { width: 11px; height: 11px; color: #f5c451; }
   .evt .m { font-size: 11px; color: var(--text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .evt .del-btn {
     position: absolute; top: 5px; right: 5px;
@@ -215,7 +227,10 @@
   <aside>
     <div class="form-card">
       <input type="text" id="f-title" placeholder="任务名" maxlength="60">
-      <textarea id="f-note" placeholder="备注" maxlength="300"></textarea>
+      <div class="note-wrap">
+        <textarea id="f-note" placeholder="备注" maxlength="300"></textarea>
+        <button class="alarm-btn" id="btn-alarm" title="闹钟(导出备注带'添加闹钟')"><i data-lucide="bell"></i></button>
+      </div>
       <div class="time-row">
         <div class="t-col">
           <label class="f-label">开始时间</label>
@@ -285,7 +300,10 @@
   function save() { localStorage.setItem(KEY, JSON.stringify(items)); }
   function uid() { return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   var items = load() || [];
-  items.forEach(function (it) { if (typeof it.leadMin !== 'number') it.leadMin = 5; });
+  items.forEach(function (it) {
+    if (typeof it.leadMin !== 'number') it.leadMin = 5;
+    if (typeof it.alarm !== 'boolean') it.alarm = false;
+  });
   // 形如 { id, title, note, day:'YYYY-MM-DD', startMin, endMin }
 
   /* ================= 日期工具 ================= */
@@ -392,6 +410,17 @@
   }
   defaultTimes();
 
+  /* ================= 闹钟开关(导出时备注追加"添加闹钟",UI 不显示) ================= */
+  var alarmOn = false;
+  function setAlarm(v) {
+    alarmOn = !!v;
+    $('#btn-alarm').classList.toggle('on', alarmOn);
+  }
+  $('#btn-alarm').addEventListener('click', function () {
+    setAlarm(!alarmOn);
+    toast(alarmOn ? '闹钟开启(导出备注将带"添加闹钟")' : '闹钟已关闭');
+  });
+
   function submit() {
     var title = fTitle.value.trim();
     if (!title) { toast('请先填写任务名'); fTitle.focus(); return; }
@@ -403,18 +432,18 @@
     }
     if (editingId) {
       var it = items.find(function (x) { return x.id === editingId; });
-      if (it) { it.title = title; it.note = fNote.value.trim(); it.startMin = startMin; it.endMin = endMin; it.leadMin = getLead(); }
+      if (it) { it.title = title; it.note = fNote.value.trim(); it.startMin = startMin; it.endMin = endMin; it.leadMin = getLead(); it.alarm = alarmOn; }
       editingId = null; setEditMode(false);
       toast('已保存修改');
     } else {
-      items.push({ id: uid(), title: title, note: fNote.value.trim(), day: day, startMin: startMin, endMin: endMin, leadMin: getLead() });
+      items.push({ id: uid(), title: title, note: fNote.value.trim(), day: day, startMin: startMin, endMin: endMin, leadMin: getLead(), alarm: alarmOn });
       toast('已添加到' + (selDay === 'today' ? '今天' : '明天'));
     }
     save();
     clearForm();
     render();
   }
-  function clearForm() { fTitle.value = ''; fNote.value = ''; defaultTimes(); }
+  function clearForm() { fTitle.value = ''; fNote.value = ''; defaultTimes(); setAlarm(false); }
   $('#btn-submit').addEventListener('click', submit);
   fTitle.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
 
@@ -431,6 +460,7 @@
     setTimeSel([wStartH, wStartM], it.startMin);
     setTimeSel([wEndH, wEndM], it.endMin);
     setLead(it.leadMin);
+    setAlarm(it.alarm);
     enforceEnd();
     setEditMode(true);
     toast('正在编辑：' + it.title);
@@ -522,6 +552,12 @@
         el.style.width = (colW - 8) + 'px';
         var tt = document.createElement('div');
         tt.className = 't'; tt.textContent = it.title;
+        if (it.alarm) {
+          var ab = document.createElement('span');
+          ab.className = 'alarm-badge';
+          ab.innerHTML = '<i data-lucide="bell"></i>';
+          tt.appendChild(ab);
+        }
         var mm = document.createElement('div');
         mm.className = 'm';
         mm.textContent = minsToHHMM(it.startMin) + ' – ' + minsToHHMM(Math.min(it.endMin, 1439)) + (it.note ? ' · ' + it.note : '');
@@ -585,11 +621,21 @@
     var dayItems = items.filter(function (it) { return it.day === day; });
     if (!dayItems.length) { toast('这一天没有任务,没有可复制的'); return; }
     var payload = {
-      '_说明': '快捷日程表导出(字段含义): day=任务所属日期(YYYY-MM-DD); title=任务名; note=备注文字(可为空); startMin=开始时间,当天0点起的分钟数(如 9:30=570); endMin=结束时间,分钟数(可大于1440,表示跨午夜,时间线显示截断到24:00); leadMin=提前提醒分钟数(5/30/60)',
+      '_说明': '快捷日程表导出(字段含义): day=任务所属日期(YYYY-MM-DD); title=任务名; note=备注文字(可为空,若alarm=true则末尾已追加" 添加闹钟"字样); startMin=开始时间,当天0点起的分钟数(如 9:30=570); endMin=结束时间,分钟数(可大于1440,表示跨午夜,时间线显示截断到24:00); leadMin=提前提醒分钟数(5/30/60); alarm=是否开启闹钟(布尔)',
       '导出日期': day,
       '日期标签': selDay === 'today' ? '今天' : '明天',
       '任务数': dayItems.length,
-      'items': dayItems.map(function (it) { return { day: it.day, title: it.title, note: it.note || '', startMin: it.startMin, endMin: it.endMin, leadMin: it.leadMin }; })
+      'items': dayItems.map(function (it) {
+        return {
+          day: it.day,
+          title: it.title,
+          note: (it.note || '') + (it.alarm ? ' 添加闹钟' : ''),
+          startMin: it.startMin,
+          endMin: it.endMin,
+          leadMin: it.leadMin,
+          alarm: !!it.alarm
+        };
+      })
     };
     var text = JSON.stringify(payload, null, 2);
     function done() { toast('已复制 ' + dayItems.length + ' 条 JSON 到剪贴板'); }
