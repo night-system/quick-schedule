@@ -311,17 +311,20 @@
      小时 00-23 × 分钟 00/05/.../55,真正 5 分钟一档 */
   var ITEM_H = 36;
   var CAN_SMOOTH = 'scrollBehavior' in document.documentElement.style;
-  function makeWheel(el, items) {
+  function makeWheel(el, items, onChange) {
     el.innerHTML = '<div class="wheel-items">' + items.map(function (v, i) {
       return '<div class="wi" data-i="' + i + '">' + v + '</div>';
     }).join('') + '</div>';
     var ticking = false;
-    function getVal() {
-      return Math.max(0, Math.min(items.length - 1, Math.round(el.scrollTop / ITEM_H)));
-    }
+    var moved = 0, startY = null, lastVal = 0;
+    function getVal() { return lastVal; }
     function apply(v) {
       var wis = el.querySelectorAll('.wi');
       for (var i = 0; i < wis.length; i++) wis[i].classList.toggle('sel', i === v);
+      if (v !== lastVal) {
+        lastVal = v;
+        if (onChange) onChange();
+      }
     }
     function setVal(v, smooth) {
       v = Math.max(0, Math.min(items.length - 1, v));
@@ -333,9 +336,18 @@
     el.addEventListener('scroll', function () {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(function () { ticking = false; apply(getVal()); });
+      requestAnimationFrame(function () {
+        ticking = false;
+        apply(Math.max(0, Math.min(items.length - 1, Math.round(el.scrollTop / ITEM_H))));
+      });
     });
+    // 记录触摸位移:拖动后松手会派发 click,需忽略,避免滚轮被误跳
+    el.addEventListener('touchstart', function (e) { startY = e.touches[0].clientY; moved = 0; }, { passive: true });
+    el.addEventListener('touchmove', function (e) {
+      if (startY !== null) moved = Math.max(moved, Math.abs(e.touches[0].clientY - startY));
+    }, { passive: true });
     el.addEventListener('click', function (e) {
+      if (moved > 12) return;
       var w = e.target.closest('.wi');
       if (w) setVal(+w.dataset.i, true);
     });
@@ -346,18 +358,24 @@
   var HOURS = [], MINS = [];
   for (var _h = 0; _h < 24; _h++) HOURS.push(pad(_h));
   for (var _m = 0; _m < 60; _m += 5) MINS.push(pad(_m));
-  var wStartH = makeWheel($('#wsh'), HOURS), wStartM = makeWheel($('#wsm'), MINS);
+  var wStartH = makeWheel($('#wsh'), HOURS, enforceEnd), wStartM = makeWheel($('#wsm'), MINS, enforceEnd);
   var wEndH = makeWheel($('#weh'), HOURS), wEndM = makeWheel($('#wem'), MINS);
+  /* 结束时间必须晚于开始时间至少 5 分钟:开始滚轮每次变化后联动修正 */
+  function enforceEnd() {
+    var s = getTimeSel([wStartH, wStartM]);
+    var e = getTimeSel([wEndH, wEndM]);
+    if (e < s + 5) setTimeSel([wEndH, wEndM], Math.min(s + 5, 1435), true);
+  }
   /* 提醒提前量滚轮:5min / 30min / 1h */
   var LEAD_TICKS = [5, 30, 60];
   var wLead = makeWheel($('#wl'), ['5min', '30min', '1h']);
   function getLead() { return LEAD_TICKS[wLead.getVal()]; }
   function setLead(m) { var i = LEAD_TICKS.indexOf(m); wLead.setVal(i === -1 ? 1 : i, false); }
   setLead(30);
-  function setTimeSel(sels, min) {
+  function setTimeSel(sels, min, smooth) {
     min = round5(Math.max(0, Math.min(min, 1440 - 5)));
-    sels[0].setVal(Math.floor(min / 60), false);
-    sels[1].setVal(min % 60, false);
+    sels[0].setVal(Math.floor(min / 60), smooth);
+    sels[1].setVal(min % 60, smooth);
   }
   function getTimeSel(sels) {
     return sels[0].getVal() * 60 + sels[1].getVal();
@@ -376,9 +394,9 @@
     if (!title) { toast('请先填写任务名'); fTitle.focus(); return; }
     var startMin = getTimeSel([wStartH, wStartM]);   // 5 分钟步进
     var endMin = getTimeSel([wEndH, wEndM]);
-    if (endMin <= startMin) {
-      endMin = Math.min(startMin + 60, 1500);
-      toast('结束时间早于开始，已自动设为开始后 1 小时');
+    if (endMin < startMin + 5) {
+      endMin = Math.min(startMin + 5, 1435);
+      toast('结束时间已调整为开始 + 5 分钟');
     }
     if (editingId) {
       var it = items.find(function (x) { return x.id === editingId; });
@@ -410,6 +428,7 @@
     setTimeSel([wStartH, wStartM], it.startMin);
     setTimeSel([wEndH, wEndM], it.endMin);
     setLead(it.leadMin);
+    enforceEnd();
     setEditMode(true);
     toast('正在编辑：' + it.title);
     // 故意不 focus:不在 iPad 上自动弹键盘
