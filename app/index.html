@@ -44,7 +44,7 @@
     gap: 14px;
   }
   aside {
-    width: 350px; flex-shrink: 0;
+    flex: 1 1 0; min-width: 0;
     display: flex; flex-direction: column;
     background: var(--panel);
     border-radius: 18px;
@@ -52,7 +52,7 @@
     overflow-y: auto;
   }
   main {
-    flex: 1; min-width: 0;
+    flex: 1 1 0; min-width: 0;
     background: var(--panel);
     border-radius: 18px;
     display: flex; flex-direction: column;
@@ -78,7 +78,6 @@
   }
   .day-switch button svg { width: 17px; height: 17px; }
   .day-switch button.active { background: var(--accent); color: #fff; }
-  .day-switch .dt { font-size: 11px; font-weight: 500; opacity: .85; }
 
   /* ---------- 左栏:表单 ---------- */
   .form-card { background: var(--card); border-radius: 16px; padding: 16px; }
@@ -108,20 +107,28 @@
 
   /* ---------- 右栏:时间线 ---------- */
   .tl-head {
-    padding: 16px 22px 12px;
-    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 13px 16px 11px;
+    display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--line-soft);
   }
-  .tl-head .day { font-size: 20px; font-weight: 700; }
-  .tl-head .meta { font-size: 13px; color: var(--text-2); }
+  .tl-head .day { font-size: 18px; font-weight: 700; }
+  .tl-head .meta { font-size: 12px; color: var(--text-2); margin-right: 8px; }
+  .tl-head .right { display: flex; align-items: center; gap: 8px; }
+  .btn-copy {
+    border: 1px solid var(--line); background: var(--card); color: var(--text-2);
+    width: 34px; height: 34px; border-radius: 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-copy svg { width: 16px; height: 16px; }
+  .btn-copy:active { color: var(--accent); border-color: var(--accent); }
   .tl-scroll { flex: 1; overflow-y: auto; position: relative; overscroll-behavior: contain; }
-  .tl-body { position: relative; }
-  .tl-axis { position: sticky; left: 0; width: 62px; float: left; z-index: 3; background: var(--panel); }
-  .tl-grid-wrap { margin-left: 62px; position: relative; }
+  .tl-body { position: relative; min-height: 100%; }
+  .tl-axis { position: sticky; left: 0; width: 54px; float: left; z-index: 3; background: var(--panel); }
+  .tl-grid-wrap { margin-left: 54px; position: relative; }
   .hour { height: 52px; border-top: 1px solid var(--line); position: relative; }
   .hour.half::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed var(--line-soft); }
   .hour-label {
-    position: absolute; top: -7px; right: 10px; z-index: 3;
+    position: absolute; top: -7px; right: 8px; z-index: 3;
     font-size: 11px; color: var(--text-3); background: var(--panel);
   }
   .evt {
@@ -129,12 +136,19 @@
     background: var(--accent-soft);
     border: 1px solid var(--accent-line);
     border-left: 3px solid var(--accent);
-    padding: 7px 10px 7px 11px; overflow: hidden; cursor: pointer;
+    padding: 7px 32px 7px 11px; overflow: hidden; cursor: pointer;
   }
   .evt .t { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .evt .m { font-size: 11px; color: var(--text-2); margin-top: 2px; }
-  .evt:active { background: rgba(91,140,255,.28); }
-  .now-line { position: absolute; left: 62px; right: 0; height: 2px; background: var(--now); z-index: 4; pointer-events: none; }
+  .evt .m { font-size: 11px; color: var(--text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .evt .del-btn {
+    position: absolute; top: 5px; right: 5px;
+    width: 22px; height: 22px; border-radius: 7px; border: 0;
+    background: rgba(0,0,0,.22); color: var(--text-2);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .evt .del-btn svg { width: 13px; height: 13px; }
+  .evt .del-btn:active { background: var(--danger); color: #fff; }
+  .now-line { position: absolute; left: 54px; right: 0; height: 2px; background: var(--now); z-index: 4; pointer-events: none; }
   .now-line::before {
     content: ''; position: absolute; top: -4px; left: -4px;
     width: 10px; height: 10px; border-radius: 50%; background: var(--now);
@@ -146,29 +160,6 @@
   }
   .tl-empty svg { width: 52px; height: 52px; }
 
-  /* ---------- 详情浮层 ---------- */
-  .mask {
-    position: fixed; inset: 0; z-index: 50;
-    background: rgba(0, 0, 0, .55); backdrop-filter: blur(6px);
-    display: none; align-items: center; justify-content: center;
-  }
-  .mask.show { display: flex; }
-  .sheet {
-    width: 400px; max-width: 88vw; background: var(--card); border: 1px solid var(--line);
-    border-radius: 18px; padding: 22px; box-shadow: 0 18px 60px rgba(0,0,0,.5);
-  }
-  .sheet h3 { margin: 0 0 6px; font-size: 19px; }
-  .sheet .st { font-size: 13px; color: var(--accent); margin-bottom: 10px; }
-  .sheet .note { font-size: 14px; color: var(--text-2); line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
-  .sheet .btns { display: flex; gap: 10px; margin-top: 20px; }
-  .sheet .btns button {
-    flex: 1; border: 0; border-radius: 12px; padding: 12px 0; font-size: 15px; font-weight: 600; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-  }
-  .sheet .btns svg { width: 16px; height: 16px; }
-  .sheet .b-del { background: rgba(255,107,107,.14); color: var(--danger); }
-  .sheet .b-edit { background: var(--accent); color: #fff; }
-
   .toast {
     position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%);
     background: var(--card-2); border: 1px solid var(--line); color: var(--text);
@@ -179,7 +170,6 @@
 
   @media (max-width: 700px) {
     .app { flex-direction: column; overflow-y: auto; }
-    aside { width: auto; }
     main { min-height: 70vh; }
   }
 </style>
@@ -231,7 +221,10 @@
   <main>
     <div class="tl-head">
       <div class="day" id="tl-day">今天</div>
-      <div class="meta" id="tl-meta"></div>
+      <div class="right">
+        <div class="meta" id="tl-meta"></div>
+        <button class="btn-copy" id="btn-copy" title="复制当天日程 JSON"><i data-lucide="copy"></i></button>
+      </div>
     </div>
     <div class="tl-scroll" id="tl-scroll">
       <div class="tl-body" id="tl-body">
@@ -242,19 +235,6 @@
   </main>
 </div>
 
-<!-- 详情浮层 -->
-<div class="mask" id="mask">
-  <div class="sheet">
-    <h3 id="sheet-title"></h3>
-    <div class="st" id="sheet-time"></div>
-    <div class="note" id="sheet-note"></div>
-    <div class="btns">
-      <button class="b-del" id="btn-del"><i data-lucide="trash-2"></i>删除</button>
-      <button class="b-edit" id="btn-edit"><i data-lucide="pencil"></i>编辑</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script src="vendor/lucide.min.js"></script>
@@ -263,7 +243,6 @@
   'use strict';
   var $ = function (s) { return document.querySelector(s); };
   var HOUR_H = 52;               // 每小时像素
-  var DAY_MS = 86400e3;
 
   /* ================= 数据 ================= */
   var KEY = 'quick-schedule-items-v1';
@@ -328,26 +307,38 @@
       toast('已添加到' + (selDay === 'today' ? '今天' : '明天'));
     }
     save();
-    fTitle.value = ''; fNote.value = ''; defaultTimes();
+    clearForm();
     render();
   }
   function toMin(v, dft) {
     var m = /^(\d{1,2}):(\d{2})$/.exec(v || '');
     return m ? (Math.min(23, +m[1]) * 60 + Math.min(59, +m[2])) : dft;
   }
+  function clearForm() { fTitle.value = ''; fNote.value = ''; defaultTimes(); }
   $('#btn-submit').addEventListener('click', submit);
   fTitle.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
 
-  /* ================= 编辑模式 ================= */
+  /* ================= 编辑模式(左侧直接编辑,不弹键盘) ================= */
   function setEditMode(on) {
     $('#edit-hint').classList.toggle('show', on);
     $('#btn-submit').innerHTML = on ? '<i data-lucide="check"></i>保存修改' : '<i data-lucide="plus"></i>添加任务';
     if (window.lucide) lucide.createIcons();
   }
-  $('#btn-cancel-edit').addEventListener('click', function () {
+  function loadEdit(it) {
+    editingId = it.id;
+    fTitle.value = it.title;
+    fNote.value = it.note || '';
+    fStart.value = minsToHHMM(it.startMin);
+    fEnd.value = minsToHHMM(Math.min(it.endMin, 1439));
+    setEditMode(true);
+    toast('正在编辑：' + it.title);
+    // 故意不 focus:不在 iPad 上自动弹键盘
+  }
+  function cancelEdit() {
     editingId = null; setEditMode(false);
-    fTitle.value = ''; fNote.value = ''; defaultTimes();
-  });
+    clearForm();
+  }
+  $('#btn-cancel-edit').addEventListener('click', cancelEdit);
 
   /* ================= 今天/明天切换 ================= */
   $('#day-switch').addEventListener('click', function (e) {
@@ -356,30 +347,22 @@
     selDay = btn.dataset.day;
     day = dayKey(selDay === 'tomorrow' ? 1 : 0);
     document.querySelectorAll('#day-switch button').forEach(function (b) { b.classList.toggle('active', b === btn); });
-    fTitle.value = ''; fNote.value = ''; defaultTimes();
-    if (editingId) { editingId = null; setEditMode(false); }
+    cancelEdit();
     render();
-    var scrollMin = (selDay === 'today' && new Date().getHours() > 1) ? new Date().getHours() * 60 : 7 * 60;
-    scrollToMin(scrollMin);
+    scrollToMin((selDay === 'today' && new Date().getHours() > 1) ? new Date().getHours() * 60 : 7 * 60);
   });
 
   /* ================= 渲染:时间线 ================= */
   var tlBody = $('#tl-body'), tlGrid = $('#tl-grid'), tlAxis = $('#tl-axis'), tlScroll = $('#tl-scroll');
 
   function buildGridOnce() {
-    tlGrid.innerHTML = '';
     if (tlGrid.dataset.built) return;
     var html = '';
-    for (var h = 0; h < 24; h++) {
-      html += '<div class="hour' + (h > 0 ? ' half' : '') + '"></div>';
-    }
+    for (var h = 0; h < 24; h++) html += '<div class="hour' + (h > 0 ? ' half' : '') + '"></div>';
     tlGrid.innerHTML = html;
     tlGrid.dataset.built = '1';
-    // 时间刻度
     var ax = '';
-    for (var h2 = 0; h2 < 24; h2++) {
-      ax += '<div class="hour-label" style="top:' + (h2 * HOUR_H - 7) + 'px">' + pad(h2) + ':00</div>';
-    }
+    for (var h2 = 0; h2 < 24; h2++) ax += '<div class="hour-label" style="top:' + (h2 * HOUR_H - 7) + 'px">' + pad(h2) + ':00</div>';
     tlAxis.innerHTML = ax;
     tlAxis.style.height = (24 * HOUR_H) + 'px';
     tlGrid.style.height = (24 * HOUR_H) + 'px';
@@ -415,7 +398,6 @@
 
   function render() {
     buildGridOnce();
-    // 清除旧任务块与当前线
     tlGrid.querySelectorAll('.evt').forEach(function (n) { n.remove(); });
     var nl = document.querySelector('.now-line'); if (nl) nl.remove();
     var empty = document.querySelector('.tl-empty'); if (empty) empty.remove();
@@ -441,8 +423,17 @@
         var mm = document.createElement('div');
         mm.className = 'm';
         mm.textContent = minsToHHMM(it.startMin) + ' – ' + minsToHHMM(Math.min(it.endMin, 1439)) + (it.note ? ' · ' + it.note : '');
-        el.appendChild(tt); el.appendChild(mm);
-        el.addEventListener('click', function () { openSheet(it); });
+        var db = document.createElement('button');
+        db.className = 'del-btn'; db.title = '删除';
+        db.innerHTML = '<i data-lucide="trash-2"></i>';
+        db.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          items = items.filter(function (x) { return x.id !== it.id; });
+          if (editingId === it.id) cancelEdit();
+          save(); render(); toast('已删除：' + it.title);
+        });
+        el.appendChild(tt); el.appendChild(mm); el.appendChild(db);
+        el.addEventListener('click', function () { loadEdit(it); });
         tlGrid.appendChild(el);
       });
     });
@@ -456,7 +447,6 @@
       tlScroll.appendChild(line);
     }
 
-    // 空状态
     if (dayItems.length === 0) {
       var em = document.createElement('div');
       em.className = 'tl-empty';
@@ -464,11 +454,9 @@
       tlScroll.appendChild(em);
     }
 
-    // 头部
     $('#tl-day').textContent = selDay === 'today' ? '今天' : '明天';
     $('#tl-meta').textContent = dayLabel(day) + ' · ' + dayItems.length + ' 项';
 
-    // 统计
     var total = dayItems.reduce(function (s, it) { return s + Math.max((it.endMin - it.startMin), 30); }, 0);
     $('#day-summary').innerHTML = '<span>当天 <b>' + dayItems.length + '</b> 项</span><span>总时长 <b>' +
       Math.floor(total / 60) + ' 小时 ' + Math.round(total % 60) + ' 分</b></span>';
@@ -479,32 +467,34 @@
     tlScroll.scrollTop = Math.max(0, m / 60 * HOUR_H - HOUR_H * 2.5);
   }
 
-  /* ================= 详情浮层 ================= */
-  var mask = $('#mask'), curId = null, draft = null;
-  function openSheet(it) {
-    curId = it.id; draft = it;
-    $('#sheet-title').textContent = it.title;
-    $('#sheet-time').textContent = dayLabel(it.day) + ' ' + minsToHHMM(it.startMin) + ' – ' + minsToHHMM(Math.min(it.endMin, 1439));
-    $('#sheet-note').textContent = it.note || '（无备注）';
-    mask.classList.add('show');
+  /* ================= 复制 JSON ================= */
+  $('#btn-copy').addEventListener('click', function () {
+    var dayItems = items.filter(function (it) { return it.day === day; });
+    if (!dayItems.length) { toast('这一天没有任务,没有可复制的'); return; }
+    var payload = {
+      '_说明': '快捷日程表导出(字段含义): day=任务所属日期(YYYY-MM-DD); title=任务名; note=备注文字(可为空); startMin=开始时间,当天0点起的分钟数(如 9:30=570); endMin=结束时间,分钟数(可大于1440,表示跨午夜,时间线显示截断到24:00)',
+      '导出日期': day,
+      '日期标签': selDay === 'today' ? '今天' : '明天',
+      '任务数': dayItems.length,
+      'items': dayItems.map(function (it) { return { day: it.day, title: it.title, note: it.note || '', startMin: it.startMin, endMin: it.endMin }; })
+    };
+    var text = JSON.stringify(payload, null, 2);
+    function done() { toast('已复制 ' + dayItems.length + ' 条 JSON 到剪贴板'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
+    } else {
+      fallbackCopy(text); done();
+    }
+  });
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+    ta.remove();
   }
-  function closeSheet() { mask.classList.remove('show'); }
-  mask.addEventListener('click', function (e) { if (e.target === mask) closeSheet(); });
-  $('#btn-del').addEventListener('click', function () {
-    items = items.filter(function (x) { return x.id !== curId; });
-    save(); closeSheet(); render(); toast('已删除');
-  });
-  $('#btn-edit').addEventListener('click', function () {
-    if (!draft) return;
-    fTitle.value = draft.title;
-    fNote.value = draft.note || '';
-    fStart.value = minsToHHMM(draft.startMin);
-    fEnd.value = minsToHHMM(Math.min(draft.endMin, 1439));
-    editingId = draft.id; setEditMode(true);
-    closeSheet();
-    $('#day-switch button[data-day=' + (draft.day === dayKey(0) ? 'today' : 'tomorrow') + ']').click();
-    fTitle.focus();
-  });
 
   /* ================= 工具 ================= */
   var toastTimer = null;
@@ -520,7 +510,8 @@
   window.addEventListener('resize', function () { render(); });
   setInterval(function () { if (selDay === 'today') render(); }, 60000);
   render();
-  scrollToMin(selDay === 'today' ? (new Date().getHours() * 60 + new Date().getMinutes() > 60 ? new Date().getHours() * 60 + new Date().getMinutes() : 7 * 60) : 7 * 60);
+  var nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+  scrollToMin(nowMin > 60 ? nowMin : 7 * 60);
 })();
 </script>
 </body>
