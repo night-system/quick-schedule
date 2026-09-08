@@ -311,7 +311,8 @@
      小时 00-23 × 分钟 00/05/.../55,真正 5 分钟一档 */
   var ITEM_H = 36;
   var CAN_SMOOTH = 'scrollBehavior' in document.documentElement.style;
-  function makeWheel(el, items, onChange) {
+  function makeWheel(el, items, onChange, itemH) {
+    itemH = itemH || ITEM_H;
     el.innerHTML = '<div class="wheel-items">' + items.map(function (v, i) {
       return '<div class="wi" data-i="' + i + '">' + v + '</div>';
     }).join('') + '</div>';
@@ -328,7 +329,7 @@
     }
     function setVal(v, smooth) {
       v = Math.max(0, Math.min(items.length - 1, v));
-      var top = v * ITEM_H;
+      var top = v * itemH;
       if (smooth && CAN_SMOOTH) el.scrollTo({ top: top, behavior: 'smooth' });
       else el.scrollTop = top;
       apply(v);
@@ -338,7 +339,7 @@
       ticking = true;
       requestAnimationFrame(function () {
         ticking = false;
-        apply(Math.max(0, Math.min(items.length - 1, Math.round(el.scrollTop / ITEM_H))));
+        apply(Math.max(0, Math.min(items.length - 1, Math.round(el.scrollTop / itemH))));
       });
     });
     // 记录触摸位移:拖动后松手会派发 click,需忽略,避免滚轮被误跳
@@ -368,17 +369,17 @@
   }
   /* 提醒提前量滚轮:5min / 30min / 1h */
   var LEAD_TICKS = [5, 30, 60];
-  var wLead = makeWheel($('#wl'), ['5min', '30min', '1h']);
+  var wLead = makeWheel($('#wl'), ['5min', '30min', '1h'], null, 28);   // 小滚轮 item 高 28px
   function getLead() { return LEAD_TICKS[wLead.getVal()]; }
   function setLead(m) { var i = LEAD_TICKS.indexOf(m); wLead.setVal(i === -1 ? 1 : i, false); }
   setLead(30);
   function setTimeSel(sels, min, smooth) {
     min = round5(Math.max(0, Math.min(min, 1440 - 5)));
     sels[0].setVal(Math.floor(min / 60), smooth);
-    sels[1].setVal(min % 60, smooth);
+    sels[1].setVal(Math.floor((min % 60) / 5), smooth);   // 分钟滚轮:每档 5 分钟,index = 分钟/5
   }
   function getTimeSel(sels) {
-    return sels[0].getVal() * 60 + sels[1].getVal();
+    return sels[0].getVal() * 60 + sels[1].getVal() * 5;  // 档位 → 分钟数
   }
   function defaultTimes() {
     var d = new Date();
