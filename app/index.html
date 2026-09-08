@@ -89,9 +89,17 @@
   }
   .form-card input:focus, .form-card textarea:focus { border-color: var(--accent); }
   .form-card textarea { resize: none; min-height: 58px; }
-  .time-block { margin-bottom: 12px; }
-  .time-block .f-label { margin-bottom: 6px; }
-  .time-block input[type=time] { margin-bottom: 0; }
+  .time-row { display: flex; gap: 14px; margin-bottom: 12px; }
+  .time-row .t-col { flex: 0 0 172px; min-width: 0; }
+  .time-row .t-col .f-label { margin-bottom: 6px; }
+  .time-inner { display: flex; align-items: center; gap: 3px; }
+  .time-inner select {
+    flex: 1; min-width: 0; font-size: 16px; padding: 11px 6px;
+    border: 1px solid var(--line); border-radius: 12px; outline: none;
+    background: var(--card-2); color: var(--text); appearance: none; -webkit-appearance: none;
+    text-align: center;
+  }
+  .time-inner .colon { color: var(--text-2); font-weight: 700; flex-shrink: 0; }
   .form-card .btn-submit {
     width: 100%; border: 0; border-radius: 12px; padding: 13px 0; margin-top: 4px;
     background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
@@ -197,11 +205,19 @@
       <input type="text" id="f-title" placeholder="例如：写周报" maxlength="60">
       <label class="f-label">备注</label>
       <textarea id="f-note" placeholder="可选，细节说明…" maxlength="300"></textarea>
-      <div class="time-block">
-        <label class="f-label">开始时间</label>
-        <input type="time" id="f-start" step="300">
-        <label class="f-label" style="margin-top:2px">结束时间</label>
-        <input type="time" id="f-end" step="300">
+      <div class="time-row">
+        <div class="t-col">
+          <label class="f-label">开始时间</label>
+          <div class="time-inner">
+            <select id="fs-h"></select><span class="colon">:</span><select id="fs-m"></select>
+          </div>
+        </div>
+        <div class="t-col">
+          <label class="f-label">结束时间</label>
+          <div class="time-inner">
+            <select id="fe-h"></select><span class="colon">:</span><select id="fe-m"></select>
+          </div>
+        </div>
       </div>
       <button class="btn-submit" id="btn-submit"><i data-lucide="plus"></i>添加任务</button>
       <div class="edit-hint" id="edit-hint">
@@ -275,22 +291,40 @@
   var editingId = null;          // 编辑中的任务 id
 
   /* ================= 表单 ================= */
-  var fTitle = $('#f-title'), fNote = $('#f-note'), fStart = $('#f-start'), fEnd = $('#f-end');
+  var fTitle = $('#f-title'), fNote = $('#f-note');
+  var fsH = $('#fs-h'), fsM = $('#fs-m'), feH = $('#fe-h'), feM = $('#fe-m');
+  /* 5 分钟步进的时间选择器:iOS Safari 的 type=time 忽略 step 属性(滚轮固定 1 分钟),
+     改用原生 select(小时 00-23 × 分钟 00/05/.../55),点开是 iOS 原生滚轮,真正 5 分钟一档 */
+  (function buildTimeSels() {
+    var oh = '', om = '';
+    for (var h = 0; h < 24; h++) oh += '<option value="' + pad(h) + '">' + pad(h) + '</option>';
+    for (var m = 0; m < 60; m += 5) om += '<option value="' + pad(m) + '">' + pad(m) + '</option>';
+    fsH.innerHTML = oh; feH.innerHTML = oh;
+    fsM.innerHTML = om; feM.innerHTML = om;
+  })();
   function round5(m) { return Math.round(m / 5) * 5; }   // 时间对齐到 5 分钟
+  function setTimeSel(sels, min) {
+    min = round5(Math.max(0, Math.min(min, 1440 - 5)));
+    sels[0].value = pad(Math.floor(min / 60));
+    sels[1].value = pad(min % 60);
+  }
+  function getTimeSel(sels) {
+    return (+sels[0].value) * 60 + (+sels[1].value);
+  }
   function defaultTimes() {
     var d = new Date();
     var m = round5(d.getHours() * 60 + d.getMinutes() + 30); // 最近 5 分钟刻度 + 30 分钟
     if (m >= 1440) m = 1410;
-    fStart.value = minsToHHMM(m);
-    fEnd.value = minsToHHMM(Math.min(m + 60, 1439));
+    setTimeSel([fsH, fsM], m);
+    setTimeSel([feH, feM], Math.min(m + 60, 1439));
   }
   defaultTimes();
 
   function submit() {
     var title = fTitle.value.trim();
     if (!title) { toast('请先填写任务名'); fTitle.focus(); return; }
-    var startMin = round5(toMin(fStart.value, 540));   // 默认 9:00,对齐 5 分钟
-    var endMin = round5(toMin(fEnd.value, startMin + 60));
+    var startMin = getTimeSel([fsH, fsM]);   // 5 分钟步进
+    var endMin = getTimeSel([feH, feM]);
     if (endMin <= startMin) {
       endMin = Math.min(startMin + 60, 1500);
       toast('结束时间早于开始，已自动设为开始后 1 小时');
@@ -308,10 +342,6 @@
     clearForm();
     render();
   }
-  function toMin(v, dft) {
-    var m = /^(\d{1,2}):(\d{2})$/.exec(v || '');
-    return m ? (Math.min(23, +m[1]) * 60 + Math.min(59, +m[2])) : dft;
-  }
   function clearForm() { fTitle.value = ''; fNote.value = ''; defaultTimes(); }
   $('#btn-submit').addEventListener('click', submit);
   fTitle.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
@@ -326,8 +356,8 @@
     editingId = it.id;
     fTitle.value = it.title;
     fNote.value = it.note || '';
-    fStart.value = minsToHHMM(round5(it.startMin));
-    fEnd.value = minsToHHMM(round5(Math.min(it.endMin, 1439)));
+    setTimeSel([fsH, fsM], it.startMin);
+    setTimeSel([feH, feM], it.endMin);
     setEditMode(true);
     toast('正在编辑：' + it.title);
     // 故意不 focus:不在 iPad 上自动弹键盘
