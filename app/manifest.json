@@ -1,0 +1,12 @@
+{
+  "name": "快捷日程表",
+  "short_name": "日程表",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f2f4f8",
+  "theme_color": "#3d61b8",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
