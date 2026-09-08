@@ -140,14 +140,15 @@
   }
   .tl-head .day { font-size: 18px; font-weight: 700; }
   .tl-head .meta { font-size: 12px; color: var(--text-2); margin-right: 8px; }
-  .tl-head .right { display: flex; align-items: center; gap: 8px; }
-  .btn-copy {
+  .tl-head .right { display: flex; align-items: center; gap: 12px; }
+  .btn-copy, .btn-clear {
     border: 0; background: transparent; color: var(--text-2);
     padding: 6px; border-radius: 8px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
   }
-  .btn-copy svg { width: 20px; height: 20px; }
+  .btn-copy svg, .btn-clear svg { width: 20px; height: 20px; }
   .btn-copy:active { color: var(--accent); }
+  .btn-clear:active { color: var(--danger); }
   .tl-scroll { flex: 1; overflow-y: auto; position: relative; overscroll-behavior: contain; }
   .tl-body { position: relative; min-height: 100%; }
   .tl-axis { position: sticky; left: 0; width: 54px; float: left; z-index: 3; background: var(--panel); }
@@ -250,6 +251,7 @@
       <div class="day" id="tl-day">今天</div>
       <div class="right">
         <div class="meta" id="tl-meta"></div>
+        <button class="btn-clear" id="btn-clear" title="清空当天"><i data-lucide="trash-2"></i></button>
         <button class="btn-copy" id="btn-copy" title="复制当天日程 JSON"><i data-lucide="copy"></i></button>
       </div>
     </div>
@@ -567,6 +569,16 @@
   function scrollToMin(m) {
     tlScroll.scrollTop = Math.max(0, m / 60 * HOUR_H - HOUR_H * 2.5);
   }
+
+  /* ================= 一键清空当天 ================= */
+  $('#btn-clear').addEventListener('click', function () {
+    var dayItems = items.filter(function (it) { return it.day === day; });
+    if (!dayItems.length) { toast('这一天没有任务'); return; }
+    items = items.filter(function (it) { return it.day !== day; });
+    if (editingId && !items.some(function (x) { return x.id === editingId; })) cancelEdit();
+    save(); render();
+    toast('已清空当天 ' + dayItems.length + ' 项');
+  });
 
   /* ================= 复制 JSON ================= */
   $('#btn-copy').addEventListener('click', function () {
