@@ -6,28 +6,28 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="快捷日程表">
-<meta name="theme-color" content="#0b0e14">
+<meta name="theme-color" content="#0a0a0b">
 <title>快捷日程表</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <style>
   :root {
     color-scheme: dark;
-    --bg: #0b0e14;
-    --panel: #10141d;
-    --card: #161c28;
-    --card-2: #1b2231;
-    --line: #232b3d;
-    --line-soft: #1a2130;
-    --text: #e7ebf3;
-    --text-2: #8b93a7;
-    --text-3: #5b6478;
-    --accent: #5b8cff;
-    --accent-soft: rgba(91, 140, 255, .16);
-    --accent-line: rgba(91, 140, 255, .55);
-    --danger: #ff6b6b;
-    --ok: #4cc38a;
-    --now: #ff5b5b;
+    --bg: #0a0a0b;
+    --panel: #121214;
+    --card: #1a1a1d;
+    --card-2: #202024;
+    --line: #2c2c31;
+    --line-soft: #1f1f23;
+    --text: #f0f0f2;
+    --text-2: #9c9ca4;
+    --text-3: #67676f;
+    --accent: #ffffff;                  /* 唯一强调色:白 */
+    --accent-soft: rgba(255, 255, 255, .06);
+    --accent-line: rgba(255, 255, 255, .14);
+    --on-accent: #0a0a0b;               /* 白底上的文字 */
+    --danger: #ffffff;
+    --now: #ffffff;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; height: 100%; }
@@ -53,12 +53,13 @@
     border: 0; background: transparent; color: var(--text-2);
     font-size: 14px; font-weight: 600; padding: 7px 20px; border-radius: 8px; cursor: pointer;
   }
-  .day-switch button.active { background: var(--accent); color: #fff; }
-  .top-date { font-size: 14px; color: var(--text-2); }
+  .day-switch button.active { background: var(--accent); color: var(--on-accent); }
+  .top-date { font-size: 14px; color: var(--text-2); font-variant-numeric: tabular-nums; }
   aside {
     flex: 1 1 0; min-width: 0;
     display: flex; flex-direction: column;
     background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, .05);
     border-radius: 18px;
     padding: 18px;
     overflow-y: auto;
@@ -66,19 +67,30 @@
   main {
     flex: 1 1 0; min-width: 0;
     background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, .05);
     border-radius: 18px;
     display: flex; flex-direction: column;
     overflow: hidden;
+    position: relative;
   }
+  /* 细滚动条 */
+  aside::-webkit-scrollbar, .tl-scroll::-webkit-scrollbar { width: 10px; }
+  aside::-webkit-scrollbar-track, .tl-scroll::-webkit-scrollbar-track { background: transparent; }
+  aside::-webkit-scrollbar-thumb, .tl-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, .13); border-radius: 6px;
+    border: 3px solid transparent; background-clip: content-box;
+  }
+  aside::-webkit-scrollbar-thumb:hover, .tl-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .22); background-clip: content-box; }
 
   /* ---------- 左栏:表单 ---------- */
   .add-btn {
     width: 44px; height: 44px; border-radius: 22px; border: 0;
-    background: var(--accent); color: #fff; cursor: pointer;
+    background: var(--accent); color: var(--on-accent); cursor: pointer;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: transform .12s;
   }
   .add-btn svg { width: 22px; height: 22px; }
-  .add-btn:active { opacity: .85; }
+  .add-btn:active { transform: scale(.94); }
   .cancel-btn {
     width: 44px; height: 44px; border-radius: 22px;
     border: 1px solid var(--line); background: var(--card); color: var(--text-2); cursor: pointer;
@@ -90,8 +102,8 @@
   .lead-wrap::before, .lead-wrap::after {
     content: ''; position: absolute; left: 0; right: 0; height: 18px; z-index: 3; pointer-events: none;
   }
-  .lead-wrap::before { top: 0; background: linear-gradient(to bottom, var(--panel) 20%, rgba(16, 20, 29, 0)); }
-  .lead-wrap::after { bottom: 0; background: linear-gradient(to top, var(--panel) 20%, rgba(16, 20, 29, 0)); }
+  .lead-wrap::before { top: 0; background: linear-gradient(to bottom, var(--panel) 20%, rgba(18, 18, 20, 0)); }
+  .lead-wrap::after { bottom: 0; background: linear-gradient(to top, var(--panel) 20%, rgba(18, 18, 20, 0)); }
   .form-card { background: var(--card); border-radius: 16px; padding: 14px 16px 16px; }
   .form-card .f-label { font-size: 12px; color: var(--text-2); margin-bottom: 6px; display: block; }
   .form-card input[type=text], .form-card textarea {
@@ -99,8 +111,9 @@
     border: 1px solid var(--line); border-radius: 12px; outline: none;
     background: var(--card-2); color: var(--text); font-family: inherit;
   }
-  .form-card input:focus, .form-card textarea:focus { border-color: var(--accent); }
+  .form-card input:focus, .form-card textarea:focus { border-color: rgba(255, 255, 255, .32); }
   .form-card textarea { resize: none; min-height: 58px; }
+  .form-card ::placeholder { color: #5f5f66; }
   .note-wrap { position: relative; margin-bottom: 12px; }
   .note-wrap textarea { margin-bottom: 0; padding-right: 40px; }
   .alarm-btn {
@@ -110,7 +123,7 @@
     display: flex; align-items: center; justify-content: center;
   }
   .alarm-btn svg { width: 16px; height: 16px; }
-  .alarm-btn.on { color: #f5c451; background: rgba(245, 196, 81, .12); }
+  .alarm-btn.on { color: var(--text); background: rgba(255, 255, 255, .10); }
   .time-row { display: flex; gap: 14px; margin-bottom: 12px; }
   .time-row .t-col { flex: 1; min-width: 0; }
   .time-row .t-col .f-label { margin-bottom: 6px; }
@@ -137,11 +150,11 @@
   .wheel-pair::before, .wheel-pair::after {
     content: ''; position: absolute; left: 0; right: 0; height: 20px; z-index: 3; pointer-events: none;
   }
-  .wheel-pair::before { top: 0; background: linear-gradient(to bottom, var(--card) 15%, rgba(22, 28, 40, 0)); }
-  .wheel-pair::after { bottom: 0; background: linear-gradient(to top, var(--card) 15%, rgba(22, 28, 40, 0)); }
+  .wheel-pair::before { top: 0; background: linear-gradient(to bottom, var(--card) 15%, rgba(26, 26, 29, 0)); }
+  .wheel-pair::after { bottom: 0; background: linear-gradient(to top, var(--card) 15%, rgba(26, 26, 29, 0)); }
 
   .day-summary { margin-top: 14px; font-size: 13px; color: var(--text-2); display: flex; gap: 14px; align-items: center; }
-  .day-summary b { color: var(--text); }
+  .day-summary b { color: var(--text); font-variant-numeric: tabular-nums; }
 
   /* ---------- 右栏:时间线 ---------- */
   .tl-head {
@@ -149,7 +162,7 @@
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--line-soft);
   }
-  .tl-head .day { font-size: 18px; font-weight: 700; }
+  .tl-head .day { font-size: 17px; font-weight: 700; letter-spacing: .3px; }
   .tl-head .meta { font-size: 12px; color: var(--text-2); margin-right: 8px; }
   .tl-head .right { display: flex; align-items: center; gap: 12px; }
   .btn-copy, .btn-clear {
@@ -158,50 +171,52 @@
     display: flex; align-items: center; justify-content: center;
   }
   .btn-copy svg, .btn-clear svg { width: 20px; height: 20px; }
-  .btn-copy:active { color: var(--accent); }
-  .btn-clear:active { color: var(--danger); }
+  .btn-copy:active, .btn-clear:active { color: var(--text); }
   .tl-scroll { flex: 1; overflow-y: auto; position: relative; overscroll-behavior: contain; }
   .tl-body { position: relative; min-height: 100%; }
-  .tl-axis { position: sticky; left: 0; width: 54px; float: left; z-index: 3; background: var(--panel); }
+  .tl-axis { position: sticky; left: 0; width: 54px; float: left; z-index: 3; background: var(--panel); border-right: 1px solid var(--line-soft); }
   .tl-grid-wrap { margin-left: 54px; position: relative; }
   .hour { height: 52px; border-top: 1px solid var(--line); position: relative; }
   .hour.half::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed var(--line-soft); }
   .hour-label {
     position: absolute; top: -7px; right: 8px; z-index: 3;
     font-size: 11px; color: var(--text-3); background: var(--panel);
+    font-variant-numeric: tabular-nums;
   }
   .evt {
     position: absolute; border-radius: 12px;
-    background: var(--accent-soft);
-    border: 1px solid var(--accent-line);
+    background: rgba(255, 255, 255, .07);
+    border: 1px solid rgba(255, 255, 255, .16);
     border-left: 3px solid var(--accent);
     padding: 7px 32px 7px 11px; overflow: hidden; cursor: pointer;
   }
+  .evt:active { background: rgba(255, 255, 255, .13); }
   .evt .t { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
   .evt .alarm-badge { flex-shrink: 0; display: flex; }
-  .evt .alarm-badge svg { width: 11px; height: 11px; color: #f5c451; }
+  .evt .alarm-badge svg { width: 11px; height: 11px; color: var(--text-2); }
   .evt .m { font-size: 11px; color: var(--text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .evt .del-btn {
     position: absolute; top: 5px; right: 5px;
     width: 22px; height: 22px; border-radius: 7px; border: 0;
-    background: rgba(0,0,0,.22); color: var(--text-2);
+    background: rgba(255, 255, 255, .08); color: var(--text-2);
     display: flex; align-items: center; justify-content: center; cursor: pointer;
   }
   .evt .del-btn svg { width: 13px; height: 13px; }
-  .evt .del-btn:active { background: var(--danger); color: #fff; }
+  .evt .del-btn:active { background: #fff; color: var(--on-accent); }
   .now-line { position: absolute; left: 54px; right: 0; height: 2px; background: var(--now); z-index: 4; pointer-events: none; }
   .now-line::before {
     content: ''; position: absolute; top: -4px; left: -4px;
     width: 10px; height: 10px; border-radius: 50%; background: var(--now);
   }
   .tl-empty {
-    position: absolute; inset: 0; display: flex; flex-direction: column;
+    position: absolute; left: 54px; right: 0; top: 52px; bottom: 0;
+    display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 10px;
-    color: var(--text-3); font-size: 14px; z-index: 0;
+    color: var(--text-3); font-size: 14px; z-index: 5; pointer-events: none;
   }
-  .tl-empty svg { width: 52px; height: 52px; }
+  .tl-empty svg { width: 52px; height: 52px; color: #3a3a40; }
 
-  #f-title.err { border-color: var(--danger); }
+  #f-title.err { border-color: rgba(255, 255, 255, .75); box-shadow: 0 0 0 3px rgba(255, 255, 255, .10); }
 
   @media (max-width: 700px) {
     .app { flex-direction: column; overflow-y: auto; }
@@ -582,7 +597,7 @@
       var em = document.createElement('div');
       em.className = 'tl-empty';
       em.innerHTML = '<i data-lucide="calendar-plus"></i><span>这一天还没有安排</span>';
-      tlScroll.appendChild(em);
+      document.querySelector('main').appendChild(em);   // 固定在面板可视区,不随滚动卷走
     }
 
     $('#tl-day').textContent = selDay === 'today' ? '今天' : '明天';
